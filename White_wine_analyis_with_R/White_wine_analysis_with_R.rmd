@@ -1,0 +1,531 @@
+WHITE WINE ANALYSIS  by Jose Maria G.M
+========================================================
+
+We will analyze the variables of the white wine dataset, the variables, their relationships and try to determine what determines a high quality white wine.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, packages}
+
+# Notice that the parameter "echo" was set to FALSE for this code chunk. This
+# prevents the code from displaying in the knitted HTML output. You should set
+# echo=FALSE for all code chunks in your file, unless it makes sense for your
+# report to show the code that generated a particular plot.
+
+# The other parameters for "message" and "warning" should also be set to FALSE
+# for other code chunks once you have verified that each plot comes out as you
+# want it to. This will clean up the flow of your report.
+
+
+#This sets the global heights and widths for the plots in the project.
+#This approach makes your plot sizes uniform, page-width and centered.
+
+knitr::opts_chunk$set(fig.width=9,fig.height=5,fig.path='Figs/',
+                      fig.align='center',tidy=TRUE,
+                      echo=FALSE,warning=FALSE,message=FALSE)
+
+# Load all of the packages that you end up using in your analysis in this code
+# chunk.
+library(ggplot2)
+library(dplyr)
+library(GGally)
+library(knitr)
+```
+
+```{r echo=FALSE, Load_the_Data}
+
+# Load the Data 
+wine <- read.csv("wineQualityWhites.csv")
+```
+
+# Univariate Plots Section
+
+We are going to perform some preliminary exploration of the dataset. Let's determine what are the fields of the dataset.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+#show all variables
+names(wine)
+```
+
+Which are the number of observations and the kind of variables.
+
+```{r echo=FALSE, Univariate_Plots}
+#show kind of data in each variable
+str(wine)
+```
+
+Summary of each variable.
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+# statistical data of variables
+summary(wine)
+```
+
+We can see that in the sample there are more wine of quality between 5 and 7. It would nice a dataset with more observations about quality 9, we only have 5 observations.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# table with number of observations per quality values
+table(wine$quality)
+```
+ 
+# Univariate Analysis
+Now we are going to plot the histogram of the variables of the dataset white wine.
+
+
+Plot citric acid:<br>
+It has normal distribution skewed to the right with some outliers.
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+# Histogram -  Citric Acid
+ggplot(aes(x = citric.acid), data = wine) + 
+            geom_histogram(binwidth = 0.01)
+
+```
+
+Plot residual sugar:<br>
+The distribution has very high values for low values of residual sugar.
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+# Histogram -  Residual sugar
+ggplot(aes(x = residual.sugar), data = wine) +  
+            geom_histogram(binwidth = 0.1)
+```
+
+
+Plot chlorides:<br>
+It has a normal distribution with a hight number of outliers.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+# Histogram -  Chlorides
+ggplot(aes(x = chlorides), data = wine) +  
+            geom_histogram(binwidth = 0.001)
+```
+
+Plot Free Sulfur Dioxides:<br>
+It has a normal distribution skewed to the right.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+# Histogram -  Free Sulfur Dioxide
+ggplot(aes(x = free.sulfur.dioxide), data = wine) +  
+            geom_histogram(binwidth = 1)
+```
+Plot Total Sulfur Dioxides:<br>
+It has a normal distribution with some outliers.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+# Histogram -  Total Sulfur Dioxide
+ggplot(aes(x = total.sulfur.dioxide), data = wine) +   
+            geom_histogram(binwidth = 1)
+```
+Plot Density:<br>
+It has a normal distribution with values between 0.99 and 1.0. with some outliers.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+# Histogram -  Density
+ggplot(aes(x = density), data = wine) +   
+            geom_histogram(binwidth = 0.0001)
+```
+
+
+Plot pH:<br>
+It has a normal distribution with a mean of 3.188, it is acid and this gives a refreshing sensation.
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+# Histogram -  pH
+ggplot(aes(x =  pH ), data = wine) +   
+            geom_histogram(binwidth = 0.01)
+```
+
+
+Plot Sulphates:<br>
+It has a normal distribution skewed to the right.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+# Histogram -  Sulphates
+ggplot(aes(x =  sulphates ), data = wine) +   
+            geom_histogram(binwidth = 0.01)
+```
+
+
+Plot Alcohol:<br>
+It has not a normal distribution with values between 8 and 14.
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+# Histogram -  Alcohol
+ggplot(aes(x =alcohol), data = wine) +   
+            geom_histogram(binwidth = 0.1)
+```
+
+
+Plot Quality:<br>
+It has a normal distribution.
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+# Histogram -  Quality
+ggplot(aes(x =quality), data = wine) +   
+            geom_histogram(binwidth = 1)
+```
+
+Plot Volatile Acidity:<br>
+It has a normal distribution skewed to the right.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+# Histogram -  Volatile acidity
+ggplot(aes(x = volatile.acidity), data = wine) +
+             geom_histogram(binwidth = 0.01)
+```
+
+Plot Fix Acidity:<br>
+It has a normal distribution.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+# Histogram -  Fixed acidity
+ggplot(aes(x = fixed.acidity), data = wine) +
+              geom_histogram(binwidth = 0.1)
+
+```
+ 
+# Bivariate Plots Section
+
+We are going to create a matrix where we can see if there is some correlation between variables.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.width=9, fig.height=7 }
+
+theme_set(theme_minimal(12))
+
+#set the SEED for reproducible results
+set.seed(1836)
+#create a new dataset without variable "x"
+wine_subset <- subset(wine, select = -c(X))
+ 
+#matrix plot with correlations
+ggpairs(wine_subset)+
+  theme(text = element_text(size=8), 
+     axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1, size=7))
+ 
+```
+Here we see that there are some variables with a high correlation:<br>
+   - density and alcohol  -0.78
+   - free.sulfur.dioxide and total.sulfur.dioxide  0.616
+   - residual.sugar and density  0.839
+   - quality and alcohol   0.436
+   - density - total.sulfur.dioxide  0.53
+
+First examine some relation of variables with low correlation
+
+
+We see that all white wines in the sample have pH values between 2.72 and 3.82 and the mean value increase for higher quality.
+```{r echo=FALSE, Bivariate_Plots}
+
+#plot quality - pH 
+ggplot(aes(x = quality, y = pH), data = wine)  +
+       geom_jitter(alpha=0.6, width = 0.25, height = 0) +
+       geom_line(stat = 'summary', fun.y = mean, color = "blue")
+
+```
+
+
+The residual sugar mean does not have a great variations for the quality values.
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+#plot quality - residual.sugar 
+ggplot(aes(x = quality, y = residual.sugar), data = wine) +
+           geom_jitter(alpha=0.6, width = 0.25, height = 0) +
+           geom_line(stat = 'summary', fun.y = mean, color = "blue")
+      
+```
+
+Plot alcohol-quality:<br>
+There is a correlation of 0.436, and we see how the quality increases with alcohol mean.
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+#plot quality - alcohol
+ggplot(aes(x = quality, y = alcohol), data = wine)  +
+           geom_jitter(alpha=0.6, width = 0.25, height = 0) + 
+           geom_line(stat = 'summary', fun.y = mean, color = "blue")
+ 
+
+```
+
+
+Plot alcohol-quality:<br>
+Here we see some outliers and when alcohol descreases incresases the density.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+#plot density - alcohol 
+ggplot(aes(x = density, y = alcohol), data = wine)  + 
+           geom_point(alpha = 1/20) + 
+           geom_smooth()
+        
+```
+
+ 
+    
+Plot free.sulfur.dioxide - total.sulfur.dioxide:<br>
+There is a correlation 0.616 and there are some outliers. Here when free.sulfur.dioxide increases the total.sulfur.dioxide increases.    
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+#plot free.sulfur.dioxide - total.sulfur.dioxide
+ggplot(aes(x = free.sulfur.dioxide, y = total.sulfur.dioxide), data = wine)  + 
+           geom_point(alpha = 1/15) + 
+           geom_smooth()
+
+```
+    
+Plot density - total.sulfur.dioxide:<br>
+There is a correlation 0.53 and there are some outliers. Here when density increases the total.sulfur.dioxide increases.       
+    
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+#plot density - total.sulfur.dioxide
+ggplot(aes(x = density, y = total.sulfur.dioxide), data = wine)  + 
+           geom_point(shape = 1, alpha = 1/10) + 
+           geom_smooth()
+
+```
+  
+        
+```
+
+
+
+
+
+
+
+
+
+
+ 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+#create quality groups
+quality_groups <- group_by(wine, quality)
+#calculate for each group the differents variables means.
+groups.wine <- summarise(quality_groups,
+          alcohol_mean = mean(alcohol),
+          residual.sugar_mean = mean(residual.sugar),
+          density_mean = mean(density),
+          pH_mean = mean(pH),
+          fixed.acidity_mean = mean(fixed.acidity),
+          volatile.acidity_mean = mean(volatile.acidity),
+          citric.acid_mean = mean(citric.acid),
+          sulphates_mean = mean(sulphates), 
+          chlorides_mean = mean(chlorides),
+          free.sulfur.dioxide_mean = mean(free.sulfur.dioxide),
+          total.sulfur.dioxide_mean = mean(total.sulfur.dioxide),
+          n = n())
+
+#arrage by age
+groups.wine <- arrange(groups.wine, quality)
+ 
+```
+
+# Bivariate Analysis
+
+We have seen that there are some strong relation between variables:<br>
+    - density and alcohol   
+    - free.sulfur.dioxide and total.sulfur.dioxide   
+    - residual.sugar and density   
+    - quality and alcohol 
+    - density and toal sulfur dioxide
+
+Here we have the means of the variables of the dataset of white wine.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+#create table1 
+table1 <- groups.wine
+
+#remove columns 
+table1 <- table1[,-(8:12)]
+
+#show table
+kable(table1,caption = "Summary means part 1")
+
+
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+#create table2 
+table2 <- groups.wine
+
+#remove columns 
+table2 <- table2[,-(2:7)] 
+
+#show table
+kable(table2,caption = "Summary means part 2")
+
+```
+ 
+  
+
+# Multivariate Plots Section
+
+Plot residual sugar and density: here we see how increases density when increases residual sugar.
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+#plot residual.sugar and density
+ggplot(aes(x = residual.sugar, y = density), data = wine)  + 
+           geom_point(alpha = 1/30, color = "blue") + 
+           geom_smooth(method = "lm", color= 'red',size = 1) 
+```
+
+
+Plot density and chlorides: here we see how decreases chlorides and density increases quality.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+#create subset wine
+wine_multi <- subset(wine, density <quantile(wine$density,0.95) &
+                       chlorides < quantile(wine$chlorides,0.95))
+#plot density and chlorides with mean values                       
+ggplot(aes(x = density, y = chlorides), data = wine_multi) +
+  geom_point(alpha = 0.8, aes(color = as.factor(quality))) +
+  geom_point(aes(x = density_mean, y = chlorides_mean, size = quality,
+                 fill=as.factor(quality)), data = groups.wine, pch = 21)
+```
+
+Plot free.sulfur.dioxide and total.sulfur.dioxide: we can see if free.sulfur.dioxide increases also increases total.sulfur.dioxide.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# plot free.sulfur.dioxide and total.sulfur.dioxide
+ggplot(aes(x = total.sulfur.dioxide, y = free.sulfur.dioxide), data = wine_multi) +
+      geom_point(alpha = 0.8, aes(color = as.factor(quality))) +
+       
+      geom_point(aes(x = density_mean, y = chlorides_mean, size = quality,
+                 fill=as.factor(quality)), data = groups.wine, pch = 21) +
+       
+      scale_color_brewer(type = "div", palette = "RdYlBu", name="Quality",
+                     direction=-1)+ # color the scatterplot by quality
+      scale_fill_brewer(type = "div", palette = "RdYlBu", name="Quality",
+                    direction=-1) + # color the mean points by Quality
+      xlim(0,250) +
+      ylim(0,150)
+
+```
+
+
+Plot density and alcohol: we can see if alcohol increases also decreases density and increases quality.
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+#plot density and alcohol 
+ggplot(aes(x = density, y = alcohol), data = wine)  + 
+           geom_point(aes(color = as.factor(quality)), alpha= 0.9) +
+           geom_smooth(color= 'red',size = 1) +
+           xlim(0.985,1.0) +
+           geom_point(aes(x = density_mean, y = alcohol_mean, size = quality,
+                 fill=as.factor(quality)), data = groups.wine, pch = 21)
+              
+```
+
+# Multivariate Analysis
+
+We have seen how with high alcohol, low density we have a high quality wine.<br>
+Also chlorides and density decreases, quality increases.
+
+
+------
+
+# Final Plots and Summary
+
+### Plot One
+
+
+```{r echo=FALSE, Plot_One}
+
+#plot residual.sugar and density
+ggplot(aes(x = residual.sugar, y = density), data = wine)  +
+  geom_point(aes(color = as.factor(quality)), alpha= 0.8) +  # color the points by quality level
+  xlab("residual sugar") +
+  geom_smooth(method = "lm", color= 'red',size = 1) +
+  xlim(0,20)  +
+  geom_point(aes(x = residual.sugar_mean, y = density_mean, size = quality,
+                 fill=as.factor(quality)), data = groups.wine, pch = 21) +
+  scale_color_brewer(type = "div", palette = "RdYlBu", name="Quality",
+                     direction=-1)+ # color the scatterplot by quality
+  scale_fill_brewer(type = "div", palette = "RdYlBu", name="Quality",
+                    direction=-1) + # color the mean points by Quality  
+  ylab(expression(Density~(g/cm^{3}))) +
+  xlab(expression(Residual~Sugar~(g/dm^{3})))  +
+  ggtitle("Alcohol and Residual Sugar, by Quality")
+ 
+```
+
+### Description One
+In the previous plot we see density and residual sugar with a correlation of 0.839 is the greater value in the whole variables. It can use a linea regression to estimate the values. If residual sugar decrease density and increases the quality of the white wine.
+
+### Plot Two
+```{r echo=FALSE, Plot_Two}
+
+#plot density and alcohol 
+ggplot(aes(x = density, y = alcohol), data = wine)  + 
+           geom_point(aes(color = as.factor(quality)), alpha= 0.9) +
+           xlab(expression(Density~(g/cm^{3}))) +
+           ylab(expression(Alcohol~("% by volume"))) +
+           geom_smooth(color= 'red',size = 1) +
+           xlim(0.985,1.0) +
+           geom_point(aes(x = density_mean, y = alcohol_mean, size = quality,
+                 fill=as.factor(quality)), data = groups.wine, pch = 21) +
+           scale_size_continuous(range = c(3, 10)) + # change the default size option
+           scale_color_brewer(type = "div", palette = "RdYlBu", name="Quality",
+                     direction=-1)+ # color the scatterplot by quality
+          scale_fill_brewer(type = "div", palette = "RdYlBu", name="Quality",
+                    direction=-1) + # color the mean points by Quality
+          guides(size=FALSE) + # don't include the size legend
+           ggtitle("Density and Alcohol and mean")
+```
+
+### Description Two
+In the previous plot we see the high correlation 0.78 between alcohol and density.When density decreases then alcohol increases and the quality of the wine.
+
+### Plot Three
+
+```{r}
+# plot density and chloides with means
+ggplot(aes(x = density, y = chlorides), data = wine_multi) +
+      geom_point(alpha = 0.8, aes(color = as.factor(quality))) +
+      xlab(expression(Density~(g/cm^{3}))) +
+      ylab(expression("Sodium chloride"~(g / dm^{3}))) +
+      geom_point(aes(x = density_mean, y = chlorides_mean, size = quality,
+                 fill=as.factor(quality)), data = groups.wine, pch = 21) +
+      geom_smooth(color= 'red',size = 1) +
+      scale_size_continuous(range = c(3, 10)) + # change the default size option
+      scale_color_brewer(type = "div", palette = "RdYlBu", name="Quality",
+                     direction=-1)+ # color the scatterplot by quality
+      scale_fill_brewer(type = "div", palette = "RdYlBu", name="Quality",
+                    direction=-1) + # color the mean points by Quality
+      guides(size=FALSE) +# don't include the size legend
+           ggtitle("Density and Chlorides, by quality")   
+```
+
+
+
+### Description Three
+In this plot we see how with low density and low chlorides we have high quality white wines.
+
+ 
+
+# Reflection
+
+We have some variables with high correlations:<br>
+    - density and alcohol  
+    - free.sulfur.dioxide and total.sulfur.dioxide  
+    - residual.sugar and density   
+    - quality and alcohol 
+    
+Also we have discovered that we high alcohol  and low density we have high quality white wines. And with low chlorides and low density we have high quality white wines.
+
+Here we have a few variables and I only have checked linear correlation, which would be the methology for a high number of variables? how could I detect other kind of relation between two or more variables?
+
+In relation to R I have had some problems to search a way to show the tables of means variables.  
+  
+With these infomation now we could predict the quality of a white wine.
+ 
